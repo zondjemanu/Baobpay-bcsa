@@ -1,48 +1,13 @@
 const express = require('express');
-const cors = require('cors');
 const app = express();
-app.use(cors());
 app.use(express.json());
-
-let db = {
-  users: {
-    "22507010101": { nom: "CEO CI", solde: 10000, pin: "1234" },
-    "22177020202": { nom: "Client SN", solde: 5000, pin: "1234" }
-  }
-};
-
-app.post('/login', (req, res) => {
-  const { tel, pin } = req.body;
-  if(db.users[tel] && db.users[tel].pin == pin) {
-    res.json({ success: true, nom: db.users[tel].nom, solde: db.users[tel].solde });
-  } else {
-    res.status(401).json({ error: "Tel ou PIN incorrect" });
-  }
-});
-
-app.post('/transfert', (req, res) => {
-  const { fromTel, toTel, montant, pin } = req.body;
-  let m = parseFloat(montant);
-  const frais = m * 0.01;
-  if(!db.users[fromTel] || db.users[fromTel].pin!= pin) return res.status(401).json({ error: "PIN incorrect" });
-  if(db.users[fromTel].solde < m) return res.status(400).json({ error: "Solde insuffisant" });
-  if(!db.users[toTel]) return res.status(404).json({ error: "Destinataire introuvable" });
-  db.users[fromTel].solde -= m;
-  db.users[toTel].solde += (m - frais);
-  res.json({ success: true, envoye: m, frais: frais, recu: m-frais, solde: db.users[fromTel].solde });
-});
-
-app.get('/', (req, res) => {
-  res.send(`<h1 style="color:gold;background:#000;text-align:center;padding:30px">🌳 BAOBPAY MVP EN LIGNE</h1>`);
-});
-
-
+app.use(express.urlencoded({ extended: true }));
 const PORT = process.env.PORT || 8080;
 
-app.get('/health', (req, res) => {
-  res.json({status: 'ok', service: 'baobpay-mvp'});
+app.get('/', (req, res) => {
+  res.send(`<!DOCTYPE html><html><head><title>BAOBPAY MVP</title><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{background:#000;color:#FFD700;font-family:Arial;text-align:center;padding:30px}h1{font-size:40px}.box{background:#111;padding:30px;border-radius:15px;max-width:400px;margin:auto;border:2px solid #FFD700}input,button{width:90%;padding:12px;margin:10px 0;border-radius:8px;border:none;font-size:16px}button{background:#FFD700;color:#000;font-weight:bold;cursor:pointer}#result{margin-top:20px;color:#FFF}</style></head><body><h1>🌳 BAOBPAY MVP</h1><p>Transfert Orange Money CI</p><div class="box"><h3>Envoyer de l'argent</h3><form id="transferForm"><input type="text" id="numero" placeholder="Numéro Orange: 07XXXXXXX" required><input type="number" id="montant" placeholder="Montant FCFA" required><button type="submit">ENVOYER</button></form><div id="result"></div></div><script>document.getElementById('transferForm').onsubmit=async(e)=>{e.preventDefault();const numero=document.getElementById('numero').value;const montant=document.getElementById('montant').value;document.getElementById('result').innerText='Envoi en cours...';const res=await fetch('/transfert',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({numero,montant})});const data=await res.json();document.getElementById('result').innerText=JSON.stringify(data)}</script></body></html>`);
 });
 
-app.listen(PORT, () => {
-  console.log(`BAOBPAY running on port ${PORT}`);
-});
+app.get('/health', (req, res) => { res.json({ status: 'ok', service: 'baobpay-mvp' });
+app.post('/transfert', (req, res) => { const { numero, montant } = req.body; res.json({ status: 'recu', numero, montant, message: 'En attente des clés Orange Money' });
+app.listen(PORT, () => console.log(`Baobpay tourne sur le port ${PORT}`));
