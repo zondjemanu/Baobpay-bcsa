@@ -4,7 +4,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const PORT = process.env.PORT || 8080;
 
-// FAUSSE BASE DE DONNEES POUR L'INSTANT
 const transactions = [];
 const users = [{numero: "0700000", solde: 50000, nom: "CEO TEST"}];
 
@@ -72,9 +71,9 @@ app.get('/', (req, res) => {
   </html>`);
 });
 
-app.get('/health', (req, res) => { res.json({ status: 'ok', service: 'payglobe-mvp' });
+app.get('/health', (req, res) => { res.json({ status: 'ok', service: 'payglobe-mvp' }); });
 
-app.get('/historique', (req, res) => { res.json({ total: transactions.length, data: transactions }); });
+app.get('/historique', (req, res) => { res.json({ total: transactions.length, data: transactions });
 
 app.post('/transfert', (req, res) => { 
   const { numero, montant } = req.body; 
