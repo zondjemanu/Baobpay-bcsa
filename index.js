@@ -4,37 +4,57 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const PORT = process.env.PORT || 8080;
 
-// PAGE WEB AVEC FORMULAIRE
+// FAUSSE BASE DE DONNEES POUR L'INSTANT
+const transactions = [];
+const users = [{numero: "0700000", solde: 50000, nom: "CEO TEST"}];
+
 app.get('/', (req, res) => {
   res.send(`<!DOCTYPE html>
   <html>
   <head>
-    <title>BAOBPAY MVP</title>
+    <title>PAYGLOBE by BAOBPAY</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-      body{background:#000;color:#FFD700;font-family:Arial;text-align:center;padding:30px}
-      h1{font-size:40px}
-      .box{background:#111;padding:30px;border-radius:15px;max-width:400px;margin:auto;border:2px solid #FFD700}
+      body{background:#000;color:#FFD700;font-family:Arial;text-align:center;padding:20px}
+      h1{font-size:35px;margin:5px 0}
+      .menu{display:grid;grid-template-columns:1fr 1fr;gap:15px;max-width:500px;margin:20px auto}
+      .btn{background:#111;padding:20px;border-radius:15px;border:2px solid #FFD700;cursor:pointer;text-decoration:none;color:#FFD700;font-weight:bold}
+      .btn:hover{background:#FFD700;color:#000}
+      .box{background:#111;padding:20px;border-radius:15px;max-width:400px;margin:20px auto;border:2px solid #FFD700;display:none}
       input,button{width:90%;padding:12px;margin:10px 0;border-radius:8px;border:none;font-size:16px}
       button{background:#FFD700;color:#000;font-weight:bold;cursor:pointer}
-      #result{margin-top:20px;color:#FFF}
     </style>
   </head>
   <body>
-    <h1>🌳 BAOBPAY MVP</h1>
-    <p>Transfert Orange Money CI</p>
-    <div class="box">
+    <img src="https://i.imgur.com/placeholder.png" alt="PAYGLOBE" style="width:100px;">
+    <h1>PAYGLOBE</h1>
+    <p>by BAOBPAY - Fintech Africa</p>
+    
+    <div class="menu">
+      <a class="btn" onclick="show('transfert')">💸 Transfert</a>
+      <a class="btn" onclick="show('paiement')">🛒 Paiement</a>
+      <a class="btn" onclick="show('facture')">📄 Factures</a>
+      <a class="btn" onclick="show('historique')">📊 Historique</a>
+    </div>
+
+    <div id="transfert" class="box">
       <h3>Envoyer de l'argent</h3>
-      <form id="transferForm">
-        <input type="text" id="numero" placeholder="Numéro Orange: 07XXXXXXX" required>
-        <input type="number" id="montant" placeholder="Montant FCFA" required>
-        <button type="submit">ENVOYER</button>
-      </form>
+      <input type="text" id="numero" placeholder="Numéro Orange: 07XXXXXXX">
+      <input type="number" id="montant" placeholder="Montant FCFA">
+      <button onclick="envoyer()">ENVOYER</button>
       <div id="result"></div>
     </div>
+
+    <div id="paiement" class="box"><h3>Paiement Marchand</h3><p>En attente des clés Orange</p></div>
+    <div id="facture" class="box"><h3>Paiement Factures</h3><p>CIE, SODECI, Canal+ bientôt</p></div>
+    <div id="historique" class="box"><h3>Historique WARI CHAIN</h3><button onclick="voirHistorique()">Voir Transactions</button><div id="hist"></div></div>
+
     <script>
-      document.getElementById('transferForm').onsubmit=async(e)=>{
-        e.preventDefault();
+      function show(id){
+        document.querySelectorAll('.box').forEach(b=>b.style.display='none');
+        document.getElementById(id).style.display='block';
+      }
+      async function envoyer(){
         const numero=document.getElementById('numero').value;
         const montant=document.getElementById('montant').value;
         document.getElementById('result').innerText='Envoi en cours...';
@@ -42,18 +62,33 @@ app.get('/', (req, res) => {
         const data=await res.json();
         document.getElementById('result').innerText=JSON.stringify(data)
       }
+      async function voirHistorique(){
+        const res=await fetch('/historique');
+        const data=await res.json();
+        document.getElementById('hist').innerText=JSON.stringify(data, null, 2)
+      }
     </script>
   </body>
   </html>`);
 });
 
-app.get('/health', (req, res) => { 
-  res.json({ status: 'ok', service: 'baobpay-mvp' });
-});
+app.get('/health', (req, res) => { res.json({ status: 'ok', service: 'payglobe-mvp' });
+
+app.get('/historique', (req, res) => { res.json({ total: transactions.length, data: transactions }); });
 
 app.post('/transfert', (req, res) => { 
   const { numero, montant } = req.body; 
-  res.json({ status: 'recu', numero, montant, message: 'En attente des clés Orange Money' });
+  const nouvelleTransaction = {
+    id: Date.now(),
+    type: "TRANSFERT",
+    numero,
+    montant,
+    date: new Date(),
+    statut: 'en_attente_orange',
+    hash: 'WARI' + Date.now()
+  };
+  transactions.push(nouvelleTransaction);
+  res.json({ status: 'recu', transaction: nouvelleTransaction, message: 'Enregistré dans WARI CHAIN' });
 });
 
-app.listen(PORT, () => console.log(`Baobpay tourne sur le port ${PORT}`));
+app.listen(PORT, () => console.log(`PAYGLOBE tourne sur le port ${PORT}`));
