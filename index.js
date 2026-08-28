@@ -36,5 +36,13 @@ app.get('/', (req, res) => {
   res.send(`<h1 style="color:gold;background:#000;text-align:center;padding:30px">🌳 BAOBPAY MVP EN LIGNE</h1>`);
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("BaobPay LANCÉ"));
+
+const PORT = process.env.PORT || 8080;
+
+app.get('/health', (req, res) => {
+  res.json({status: 'ok', service: 'baobpay-mvp'});
+});
+
+app.listen(PORT, () => {
+  console.log(`BAOBPAY running on port ${PORT}`);
+});
