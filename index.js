@@ -22,10 +22,10 @@ app.get('/', (req, res) => {
       .box{background:#111;padding:20px;border-radius:15px;max-width:400px;margin:20px auto;border:2px solid #FFD700;display:none}
       input,button{width:90%;padding:12px;margin:10px 0;border-radius:8px;border:none;font-size:16px}
       button{background:#FFD700;color:#000;font-weight:bold;cursor:pointer}
+      #hist{color:#FFF;text-align:left;font-size:12px}
     </style>
   </head>
   <body>
-    <img src="https://i.imgur.com/placeholder.png" alt="PAYGLOBE" style="width:100px;">
     <h1>PAYGLOBE</h1>
     <p>by BAOBPAY - Fintech Africa</p>
     
@@ -59,21 +59,25 @@ app.get('/', (req, res) => {
         document.getElementById('result').innerText='Envoi en cours...';
         const res=await fetch('/transfert',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({numero,montant})});
         const data=await res.json();
-        document.getElementById('result').innerText=JSON.stringify(data)
+        document.getElementById('result').innerText=JSON.stringify(data);
       }
       async function voirHistorique(){
         const res=await fetch('/historique');
         const data=await res.json();
-        document.getElementById('hist').innerText=JSON.stringify(data, null, 2)
+        document.getElementById('hist').innerText=JSON.stringify(data, null, 2);
       }
     </script>
   </body>
   </html>`);
 });
 
-app.get('/health', (req, res) => { res.json({ status: 'ok', service: 'payglobe-mvp' }); });
+app.get('/health', (req, res) => { 
+  res.json({ status: 'ok', service: 'payglobe-mvp' }); 
+});
 
-app.get('/historique', (req, res) => { res.json({ total: transactions.length, data: transactions });
+app.get('/historique', (req, res) => { 
+  res.json({ total: transactions.length, data: transactions }); 
+});
 
 app.post('/transfert', (req, res) => { 
   const { numero, montant } = req.body; 
@@ -90,4 +94,6 @@ app.post('/transfert', (req, res) => {
   res.json({ status: 'recu', transaction: nouvelleTransaction, message: 'Enregistré dans WARI CHAIN' });
 });
 
-app.listen(PORT, () => console.log(`PAYGLOBE tourne sur le port ${PORT}`));
+app.listen(PORT, () => { 
+  console.log(`PAYGLOBE tourne sur le port ${PORT}`);
+});
