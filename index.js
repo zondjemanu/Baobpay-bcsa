@@ -1,44 +1,26 @@
  const express = require('express');
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 const PORT = process.env.PORT || 8080;
 
 let transactions = [];
 let users = [{numero: "0700000", solde: 50000, nom: "CEO BAOBPAY"}];
 
-// PAGE PRINCIPALE
+// LOGO EN BASE64 POUR QUE ÇA MARCHE PARTOUT
+const logo = "https://i.imgur.com/4j3b2aL.png"; // On va l'uploader après
+
+// CSS PREMIUM NOIR + OR + BAOBAB
+const style = `<style>body{background:linear-gradient(180deg,#000 0%,#1a1a1a 100%);color:#FFD700;font-family:'Segoe UI',Arial;text-align:center;padding:20px;min-height:100vh}.logo{width:120px;margin:10px auto} h1{font-size:28px;letter-spacing:2px;margin:5px}.devise{color:#FFD700;font-size:14px;margin-bottom:20px}.menu{display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px;max-width:500px;margin:20px auto}.btn{background:#111;padding:25px;border-radius:20px;border:2px solid #FFD700;color:#FFD700;font-weight:bold;cursor:pointer;font-size:15px;text-decoration:none;display:block;transition:0.3s}.btn:hover{background:#FFD700;color:#000}.box{background:#111;padding:20px;border-radius:20px;max-width:400px;margin:20px auto;border:2px solid #FFD700;display:none} input,button{width:90%;padding:12px;margin:10px 0;border-radius:10px;border:1px solid #FFD700;background:#000;color:#FFD700} button{background:#FFD700;color:#000;font-weight:bold;cursor:pointer}.solde{font-size:45px;color:#00FF00;font-weight:bold} table{width:100%;border-collapse:collapse;margin:20px 0} th,td{border:1px solid #FFD700;padding:8px;font-size:12px} th{background:#FFD700;color:#000}</style>`;
+
 app.get('/', (req, res) => {
-res.send(`<!DOCTYPE html><html><head><title>PAYGLOBE</title><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{background:#000;color:#FFD700;font-family:Arial;text-align:center;padding:20px}h1{font-size:35px}a{display:block;background:#111;padding:20px;margin:10px auto;border-radius:15px;border:2px solid #FFD700;color:#FFD700;font-weight:bold;text-decoration:none;max-width:300px}.solde{font-size:40px;color:#00FF00}pre{background:#111;color:#FFF;text-align:left;padding:10px;border-radius:10px;overflow-x:auto}</style></head><body><h1>PAYGLOBE</h1><p>by BAOBPAY</p><a href="/portefeuille">💼 Portefeuille</a><a href="/transfert">💸 Transfert</a><a href="/qrcode">📲 QR Code</a><a href="/admin">👑 Admin</a></body></html>`);
+res.send(`<!DOCTYPE html><html><head><title>BAOBPAY</title><meta name="viewport" content="width=device-width, initial-scale=1">${style}</head><body><img src="${logo}" class="logo"><h1>BAOBPAY</h1><div class="devise">DÉVISÉ: L'OR</div><div class="menu"><div class="btn" onclick="show('portefeuille')">💼 Portefeuille</div><div class="btn" onclick="show('transfert')">💸 Envoyer</div><div class="btn" onclick="show('depot')">📈 Dépôt</div><div class="btn" onclick="show('retrait')">📉 Retrait</div><div class="btn" onclick="show('historique')">📜 Historique</div><div class="btn" onclick="show('qrcode')">📲 QR Code</div><div class="btn" onclick="show('admin')" style="grid-column:span 3">👑 Admin CEO</div></div><div id="portefeuille" class="box"><h3>Mon Portefeuille</h3><div class="solde">${users[0].solde.toLocaleString()} FCFA</div></div><div id="transfert" class="box"><h3>Envoyer de l'Argent</h3><input id="t_num" placeholder="07XXXXXXX"><input id="t_mont" placeholder="Montant FCFA"><button onclick="transfert()">ENVOYER MAINTENANT</button><div id="t_res"></div></div><div id="depot" class="box"><h3>Dépôt d'Argent</h3><input id="d_mont" placeholder="Montant à déposer"><button onclick="depot()">CRÉDITER COMPTE</button><div id="d_res"></div></div><div id="retrait" class="box"><h3>Retrait OM / MoMo</h3><input id="r_num" placeholder="Numéro OM/MoMo"><input id="r_mont" placeholder="Montant"><button onclick="retrait()">DEMANDER RETRAIT</button><div id="r_res"></div></div><div id="historique" class="box"><h3>Historique WARI CHAIN</h3><div id="h_data">Chargement...</div></div><div id="qrcode" class="box"><h3>Recevoir des Paiements</h3><img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=BAOBPAY:0700000" style="background:#FFF;padding:10px;border-radius:10px"><p>0700000</p></div><div id="admin" class="box"><h3>Panel Admin CEO</h3><button onclick="admin()">Voir Data</button><pre id="a_data" style="text-align:left;color:#FFF;font-size:10px"></pre></div><script>function show(id){document.querySelectorAll('.box').forEach(b=>b.style.display='none');document.getElementById(id).style.display='block';if(id=='historique')historique();}async function transfert(){const r=await fetch('/api/transfert',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({numero:t_num.value,montant:t_mont.value})});t_res.innerText=(await r.json()).msg;location.reload();}async function depot(){const r=await fetch('/api/depot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({montant:d_mont.value})});d_res.innerText=(await r.json()).msg;location.reload();}async function retrait(){const r=await fetch('/api/retrait',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({numero:r_num.value,montant:r_mont.value})});r_res.innerText=(await r.json()).msg;location.reload();}async function historique(){const data=await(await fetch('/api/data')).json();h_data.innerHTML='<table><tr><th>Date</th><th>Type</th><th>Montant</th></tr>'+data.transactions.map(t=>`<tr><td>${t.date}</td><td>${t.type}</td><td>${t.montant}</td></tr>`).join('')+'</table>'}async function admin(){a_data.innerText=JSON.stringify(await(await fetch('/api/data')).json(),null,2);}</script></body></html>`);
 });
 
-// PORTEFEUILLE
-app.get('/portefeuille', (req, res) => {
-res.send(`<!DOCTYPE html><html><head><title>Portefeuille</title><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{background:#000;color:#FFD700;text-align:center;padding:20px}a{color:#FFD700}.solde{font-size:40px;color:#00FF00}</style></head><body><h1>💼 Portefeuille</h1><p>Solde Disponible</p><div class="solde">50,000 FCFA</div><br><a href="/">← Retour</a></body></html>`);
-});
+// API
+app.get('/api/data', (req, res) => res.json({users, transactions}));
+app.post('/api/depot', (req, res) => {users[0].solde += parseInt(req.body.montant); transactions.push({date:new Date().toLocaleString(),type:"DEPOT",montant:req.body.montant,hash:'WARI'+Date.now()}); res.json({msg:`✅ +${req.body.montant} FCFA crédités`});
+app.post('/api/retrait', (req, res) => {if(parseInt(req.body.montant)>users[0].solde)return res.json({msg:"❌ Solde insuffisant"}); users[0].solde -= parseInt(req.body.montant); transactions.push({date:new Date().toLocaleString(),type:"RETRAIT",montant:req.body.montant,hash:'WARI'+Date.now()}); res.json({msg:`✅ Retrait de ${req.body.montant} FCFA demandé`});
+app.post('/api/transfert', (req, res) => {users[0].solde -= parseInt(req.body.montant); transactions.push({date:new Date().toLocaleString(),type:"TRANSFERT",montant:req.body.montant,hash:'WARI'+Date.now()}); res.json({msg:`✅ ${req.body.montant} FCFA envoyés à ${req.body.numero}`});});
 
-// QR CODE
-app.get('/qrcode', (req, res) => {
-res.send(`<!DOCTYPE html><html><head><title>QR Code</title><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{background:#000;color:#FFD700;text-align:center;padding:20px}a{color:#FFD700}img{background:#FFF;padding:10px;border-radius:10px}</style></head><body><h1>📲 QR Code</h1><p>Scanne pour me payer</p><img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=PAYGLOBE:0700000"><p>0700000</p><br><a href="/">← Retour</a></body></html>`);
-});
-
-// TRANSFERT
-app.get('/transfert', (req, res) => {
-res.send(`<!DOCTYPE html><html><head><title>Transfert</title><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{background:#000;color:#FFD700;text-align:center;padding:20px}input,button{width:80%;padding:12px;margin:10px 0;border-radius:8px;border:none}button{background:#FFD700;color:#000;font-weight:bold}a{color:#FFD700}</style></head><body><h1>💸 Transfert</h1><form method="POST" action="/transfert"><input name="numero" placeholder="07XXXXXXX" required><input name="montant" placeholder="Montant FCFA" required><button>ENVOYER</button></form><br><a href="/">← Retour</a></body></html>`);
-});
-
-// ADMIN
- app.get('/admin', async (req, res) => {
-const data = {users, transactions};
-res.send(`<!DOCTYPE html><html><head><title>Admin CEO</title><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{background:#000;color:#FFD700;font-family:Arial;padding:20px}h1{text-align:center}table{width:100%;border-collapse:collapse;margin:20px 0}th,td{border:1px solid #FFD700;padding:10px;text-align:left}th{background:#FFD700;color:#000}a{color:#FFD700;display:block;text-align:center;margin-top:20px}</style></head><body><h1>👑 PANEL ADMIN CEO</h1><h2>💼 Utilisateurs</h2><table><tr><th>Nom</th><th>Numéro</th><th>Solde</th></tr>${users.map(u=>`<tr><td>${u.nom}</td><td>${u.numero}</td><td>${u.solde} FCFA</td></tr>`).join('')}</table><h2>📊 WARI CHAIN - Transactions</h2><table><tr><th>ID</th><th>Numéro</th><th>Montant</th><th>Hash</th><th>Statut</th></tr>${transactions.length > 0 ? transactions.map(t=>`<tr><td>${t.id}</td><td>${t.numero}</td><td>${t.montant}</td><td>${t.hash}</td><td>${t.statut}</td></tr>`).join('') : '<tr><td colspan="5">Aucune transaction</td></tr>'}</table><a href="/">← Retour Accueil</a></body></html>`);
-});
-
-// API TRANSFERT
-app.post('/transfert', (req, res) => {
-const { numero, montant } = req.body;
-const t = {id:Date.now(), numero, montant, statut:'en_attente_orange', hash:'WARI'+Date.now(), date:new Date()};
-transactions.push(t);
-res.send(`<!DOCTYPE html><html><head><title>OK</title><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{background:#000;color:#00FF00;text-align:center;padding:50px}a{color:#FFD700}</style></head><body><h1>✅ TRANSFERT ENREGISTRÉ</h1><p>Hash: ${t.hash}</p><p>Statut: en_attente_orange</p><br><a href="/transfert">Nouveau Transfert</a><br><a href="/admin">Voir Admin</a></body></html>`);
-});
-
-app.get('/health', (req, res) => res.json({status:'ok'}));
-app.listen(PORT, () => console.log('PAYGLOBE V3.4 OK'));
+app.listen(PORT, () => console.log('BAOBPAY V4.0 RELUISANT OK'));
