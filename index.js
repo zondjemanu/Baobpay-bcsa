@@ -4,23 +4,55 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const PORT = process.env.PORT || 8080;
 
+// ===== BASE DE DONNÉES PILOTE BCSA =====
+let taux_or = 85000; // 1g d'Or = 85000 FCFA
+let users = [
+    {id:1, nom:"ETAT PILOTE CI", pays:"Côte d'Ivoire", solde_baob:1000, solde_fcfa:50000000, kyc:"VALIDE_ETAT"},
+    {id:2, nom:"ENTREPRISE TEST", pays:"Sénégal", solde_baob:50, solde_fcfa:2000000, kyc:"VALIDE"}
+];
 let transactions = [];
-let users = [{numero: "0700000", solde: 50000, nom: "CEO BAOBPAY"}];
 
-// LOGO EN BASE64 POUR QUE ÇA MARCHE PARTOUT
-const logo = "https://i.imgur.com/4j3b2aL.png"; // On va l'uploader après
+// ===== CSS SOUVERAIN NOIR + OR + BAOBAB =====
+const style = `<style>body{background:#000;color:#FFD700;font-family:'Segoe UI';margin:0;padding:20px} header{text-align:center;border-bottom:3px solid #FFD700;padding-bottom:10px}.logo{font-size:40px} h1{margin:5px}.devise{font-size:14px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin:20px 0}.card{background:#111;padding:20px;border-radius:15px;border:2px solid #FFD700;cursor:pointer}.card:hover{background:#FFD700;color:#000}.solde{font-size:35px;color:#00FF00}.box{background:#111;padding:20px;border-radius:15px;margin:20px 0;border:2px solid #FFD700;display:none} input,select,button{width:95%;padding:12px;margin:8px 0;border-radius:8px;border:1px solid #FFD700;background:#000;color:#FFD700} button{background:#FFD700;color:#000;font-weight:bold;cursor:pointer} table{width:100%;border-collapse:collapse} th,td{border:1px solid #FFD700;padding:8px} th{background:#FFD700;color:#000}</style>`;
 
-// CSS PREMIUM NOIR + OR + BAOBAB
-const style = `<style>body{background:linear-gradient(180deg,#000 0%,#1a1a1a 100%);color:#FFD700;font-family:'Segoe UI',Arial;text-align:center;padding:20px;min-height:100vh}.logo{width:120px;margin:10px auto} h1{font-size:28px;letter-spacing:2px;margin:5px}.devise{color:#FFD700;font-size:14px;margin-bottom:20px}.menu{display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px;max-width:500px;margin:20px auto}.btn{background:#111;padding:25px;border-radius:20px;border:2px solid #FFD700;color:#FFD700;font-weight:bold;cursor:pointer;font-size:15px;text-decoration:none;display:block;transition:0.3s}.btn:hover{background:#FFD700;color:#000}.box{background:#111;padding:20px;border-radius:20px;max-width:400px;margin:20px auto;border:2px solid #FFD700;display:none} input,button{width:90%;padding:12px;margin:10px 0;border-radius:10px;border:1px solid #FFD700;background:#000;color:#FFD700} button{background:#FFD700;color:#000;font-weight:bold;cursor:pointer}.solde{font-size:45px;color:#00FF00;font-weight:bold} table{width:100%;border-collapse:collapse;margin:20px 0} th,td{border:1px solid #FFD700;padding:8px;font-size:12px} th{background:#FFD700;color:#000}</style>`;
+app.get('/', (req,res)=>{
+res.send(`<!DOCTYPE html><html><head><title>BAOBPAY - BCSA</title><meta name="viewport" content="width=device-width, initial-scale=1">${style}</head><body><header><div class="logo">🌳</div><h1>BAOBPAY</h1><div class="devise">BANQUE CENTRALE DES SERVICES AFRICAINS | DEVISE: L'OR</div></header>
+<div class="grid">
+<div class="card" onclick="show('portefeuille')"><h3>💼 Portefeuille Souverain</h3></div>
+<div class="card" onclick="show('transfert')"><h3>🌍 Transfert Intra-Afrique</h3></div>
+<div class="card" onclick="show('change')"><h3>💱 Bureau de Change Or</h3></div>
+<div class="card" onclick="show('depot')"><h3>📈 Dépôt Or/FCFA</h3></div>
+<div class="card" onclick="show('retrait')"><h3>📉 Retrait OM/MoMo</h3></div>
+<div class="card" onclick="show('etat')"><h3>👑 Panel État</h3></div>
+</div>
 
-app.get('/', (req, res) => {
-res.send(`<!DOCTYPE html><html><head><title>BAOBPAY</title><meta name="viewport" content="width=device-width, initial-scale=1">${style}</head><body><img src="${logo}" class="logo"><h1>BAOBPAY</h1><div class="devise">DÉVISÉ: L'OR</div><div class="menu"><div class="btn" onclick="show('portefeuille')">💼 Portefeuille</div><div class="btn" onclick="show('transfert')">💸 Envoyer</div><div class="btn" onclick="show('depot')">📈 Dépôt</div><div class="btn" onclick="show('retrait')">📉 Retrait</div><div class="btn" onclick="show('historique')">📜 Historique</div><div class="btn" onclick="show('qrcode')">📲 QR Code</div><div class="btn" onclick="show('admin')" style="grid-column:span 3">👑 Admin CEO</div></div><div id="portefeuille" class="box"><h3>Mon Portefeuille</h3><div class="solde">${users[0].solde.toLocaleString()} FCFA</div></div><div id="transfert" class="box"><h3>Envoyer de l'Argent</h3><input id="t_num" placeholder="07XXXXXXX"><input id="t_mont" placeholder="Montant FCFA"><button onclick="transfert()">ENVOYER MAINTENANT</button><div id="t_res"></div></div><div id="depot" class="box"><h3>Dépôt d'Argent</h3><input id="d_mont" placeholder="Montant à déposer"><button onclick="depot()">CRÉDITER COMPTE</button><div id="d_res"></div></div><div id="retrait" class="box"><h3>Retrait OM / MoMo</h3><input id="r_num" placeholder="Numéro OM/MoMo"><input id="r_mont" placeholder="Montant"><button onclick="retrait()">DEMANDER RETRAIT</button><div id="r_res"></div></div><div id="historique" class="box"><h3>Historique WARI CHAIN</h3><div id="h_data">Chargement...</div></div><div id="qrcode" class="box"><h3>Recevoir des Paiements</h3><img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=BAOBPAY:0700000" style="background:#FFF;padding:10px;border-radius:10px"><p>0700000</p></div><div id="admin" class="box"><h3>Panel Admin CEO</h3><button onclick="admin()">Voir Data</button><pre id="a_data" style="text-align:left;color:#FFF;font-size:10px"></pre></div><script>function show(id){document.querySelectorAll('.box').forEach(b=>b.style.display='none');document.getElementById(id).style.display='block';if(id=='historique')historique();}async function transfert(){const r=await fetch('/api/transfert',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({numero:t_num.value,montant:t_mont.value})});t_res.innerText=(await r.json()).msg;location.reload();}async function depot(){const r=await fetch('/api/depot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({montant:d_mont.value})});d_res.innerText=(await r.json()).msg;location.reload();}async function retrait(){const r=await fetch('/api/retrait',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({numero:r_num.value,montant:r_mont.value})});r_res.innerText=(await r.json()).msg;location.reload();}async function historique(){const data=await(await fetch('/api/data')).json();h_data.innerHTML='<table><tr><th>Date</th><th>Type</th><th>Montant</th></tr>'+data.transactions.map(t=>`<tr><td>${t.date}</td><td>${t.type}</td><td>${t.montant}</td></tr>`).join('')+'</table>'}async function admin(){a_data.innerText=JSON.stringify(await(await fetch('/api/data')).json(),null,2);}</script></body></html>`);
+<div id="portefeuille" class="box"><h2>Portefeuille Baob</h2><div class="solde">${users[0].solde_baob} Baob</div><p>≈ ${(users[0].solde_baob * taux_or/1000).toLocaleString()} FCFA</p><div class="solde" style="font-size:20px">${users[0].solde_fcfa.toLocaleString()} FCFA</div></div>
+
+<div id="transfert" class="box"><h2>Transfert vers 54 États</h2><select id="t_pays"><option>Côte d'Ivoire</option><option>Sénégal</option><option>Nigeria</option><option>Ghana</option></select><input id="t_mont" placeholder="Montant en Baob"><button onclick="transfert()">TRANSFÉRER VIA WARI CHAIN</button><div id="t_res"></div></div>
+
+<div id="change" class="box"><h2>Bureau de Change Or</h2><p>1 Baob = ${(taux_or/1000).toFixed(2)} FCFA</p><input id="c_mont" placeholder="Montant en Baob"><button onclick="changer()">CONVERTIR EN FCFA</button><div id="c_res"></div></div>
+
+<div id="depot" class="box"><h2>Dépôt Souverain</h2><input id="d_mont" placeholder="Montant FCFA à déposer"><button onclick="depot()">CRÉDITER EN BAOB</button><div id="d_res"></div></div>
+
+<div id="retrait" class="box"><h2>Retrait Mobile Money</h2><input id="r_num" placeholder="Numéro OM/MoMo"><input id="r_mont" placeholder="Montant FCFA"><button onclick="retrait()">DEMANDER RETRAIT</button><div id="r_res"></div></div>
+
+<div id="etat" class="box"><h2>Panel de Souveraineté - État</h2><button onclick="etat()">VOIR FLUX DU PAYS</button><pre id="e_data" style="color:#FFF;font-size:10px"></pre></div>
+
+<script>
+function show(id){document.querySelectorAll('.box').forEach(b=>b.style.display='none');document.getElementById(id).style.display='block';}
+async function transfert(){const r=await fetch('/api/transfert',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({pays:t_pays.value,montant:t_mont.value})});t_res.innerText=(await r.json()).msg;location.reload();}
+async function changer(){const r=await fetch('/api/change',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({montant:c_mont.value})});c_res.innerText=(await r.json()).msg;location.reload();}
+async function depot(){const r=await fetch('/api/depot',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({montant:d_mont.value})});d_res.innerText=(await r.json()).msg;location.reload();}
+async function retrait(){const r=await fetch('/api/retrait',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({numero:r_num.value,montant:r_mont.value})});r_res.innerText=(await r.json()).msg;location.reload();}
+async function etat(){e_data.innerText=JSON.stringify(await(await fetch('/api/etat')).json(),null,2);}
+</script></body></html>`);
 });
 
-// API
-app.get('/api/data', (req, res) => res.json({users, transactions}));
-app.post('/api/depot', (req, res) => {users[0].solde += parseInt(req.body.montant); transactions.push({date:new Date().toLocaleString(),type:"DEPOT",montant:req.body.montant,hash:'WARI'+Date.now()}); res.json({msg:`✅ +${req.body.montant} FCFA crédités`});
-app.post('/api/retrait', (req, res) => {if(parseInt(req.body.montant)>users[0].solde)return res.json({msg:"❌ Solde insuffisant"}); users[0].solde -= parseInt(req.body.montant); transactions.push({date:new Date().toLocaleString(),type:"RETRAIT",montant:req.body.montant,hash:'WARI'+Date.now()}); res.json({msg:`✅ Retrait de ${req.body.montant} FCFA demandé`});
-app.post('/api/transfert', (req, res) => {users[0].solde -= parseInt(req.body.montant); transactions.push({date:new Date().toLocaleString(),type:"TRANSFERT",montant:req.body.montant,hash:'WARI'+Date.now()}); res.json({msg:`✅ ${req.body.montant} FCFA envoyés à ${req.body.numero}`});});
+// ===== API BCSA =====
+app.get('/api/etat',(req,res)=>res.json({pays:"Côte d'Ivoire",transactions:transactions.length,volume:transactions.reduce((a,b)=>a+parseInt(b.montant||0),0)}));
+app.post('/api/depot',(req,res)=>{const baob=parseInt(req.body.montant)/(taux_or/1000); users[0].solde_baob+=baob; users[0].solde_fcfa+=parseInt(req.body.montant); transactions.push({type:"DEPOT_OR",montant:req.body.montant,hash:'WARI'+Date.now()}); res.json({msg:`✅ ${baob.toFixed(3)} Baob crédités`});
+app.post('/api/retrait',(req,res)=>{users[0].solde_fcfa-=parseInt(req.body.montant); transactions.push({type:"RETRAIT_MOMO",montant:req.body.montant,hash:'WARI'+Date.now()}); res.json({msg:`✅ Retrait de ${req.body.montant} FCFA initié`});});
+app.post('/api/transfert',(req,res)=>{users[0].solde_baob-=parseInt(req.body.montant); transactions.push({type:"TRANSFERT_"+req.body.pays,montant:req.body.montant,hash:'WARI'+Date.now()}); res.json({msg:`✅ ${req.body.montant} Baob envoyés vers ${req.body.pays}`});
+app.post('/api/change',(req,res)=>{const fcfa=parseInt(req.body.montant)*(taux_or/1000); users[0].solde_baob-=parseInt(req.body.montant); users[0].solde_fcfa+=fcfa; res.json({msg:`✅ ${req.body.montant} Baob convertis en ${fcfa.toLocaleString()} FCFA`});
 
-app.listen(PORT, () => console.log('BAOBPAY V4.0 RELUISANT OK'));
+app.listen(PORT,()=>console.log('BAOBPAY BCSA V1.0 EN LIGNE'));
