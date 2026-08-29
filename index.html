@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BAOBPAY BCSA - L'Or Numérique de l'Afrique</title>
+<style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+    body{background:#0A1F44;color:#fff;min-height:100vh}
+    .screen{display:none;padding:20px;max-width:400px;margin:0 auto;min-height:100vh}
+    .screen.active{display:block}
+    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px}
+    .logo{font-size:24px;font-weight:bold;color:#D4AF37}
+    .card{background:#112A5A;border-radius:20px;padding:25px;margin-bottom:20px;border:1px solid #1E3A73}
+    .card-gold{background:linear-gradient(135deg,#D4AF37 0%,#F4E4A6 100%);color:#0A1F44}
+    .gold-amount{font-size:42px;font-weight:bold;margin:10px 0}
+    .btn{width:100%;padding:16px;border:none;border-radius:15px;font-size:16px;font-weight:bold;margin:8px 0;cursor:pointer}
+    .btn-gold{background:#D4AF37;color:#0A1F44}
+    .btn-dark{background:#112A5A;color:#fff;border:1px solid #1E3A73}
+    .transfer-item{display:flex;justify-content:space-between;padding:15px 0;border-bottom:1px solid #1E3A73}
+    .nav{display:flex;justify-content:space-around;position:fixed;bottom:0;left:0;right:0;background:#112A5A;padding:15px;border-top:1px solid #1E3A73}
+    .nav-btn{color:#D4AF37;background:none;border:none;font-size:12px;cursor:pointer}
+    h1{font-size:28px;margin-bottom:10px}
+    h2{font-size:20px;color:#D4AF37;margin-bottom:15px}
+    .flag{font-size:24px;margin-right:8px}
+    .success{color:#4CAF50;font-weight:bold}
+</style>
+</head>
+<body>
+
+<!-- ÉCRAN 1: RÉSERVE -->
+<div class="screen active" id="screen1">
+    <div class="header"><div class="logo">🌳 BAOBPAY</div></div>
+    <div class="card card-gold">
+        <p>RÉSERVE PERSONNELLE</p>
+        <div class="gold-amount">43,8g</div>
+        <p>d'or fin Au 999.9</p>
+        <p style="margin-top:15px;font-size:24px;">2 847 000 FCFA</p>
+        <button class="btn btn-dark" style="margin-top:15px" onclick="showScreen('screen4')">Voir mon certificat</button>
+    </div>
+    <button class="btn btn-gold" onclick="showScreen('screen2')">Accéder au Dashboard</button>
+</div>
+
+<!-- ÉCRAN 2: DASHBOARD -->
+<div class="screen" id="screen2">
+    <div class="header"><div class="logo">🌳 BAOBPAY BCSA</div></div>
+    <h1>Votre patrimoine, en un regard</h1>
+    <div class="card">
+        <p>Solde Total</p>
+        <div class="gold-amount" style="color:#D4AF37">2 847 000 FCFA</div>
+        <p class="success">+4.7% ce mois</p>
+    </div>
+    <button class="btn btn-gold" onclick="showScreen('screen3')">Acheter de l'Or</button>
+    <button class="btn btn-gold" onclick="showScreen('screen3')">Envoyer</button>
+    <button class="btn btn-gold" onclick="showScreen('screen3')">Recevoir</button>
+    <div class="nav">
+        <button class="nav-btn" onclick="showScreen('screen1')">Accueil</button>
+        <button class="nav-btn" onclick="showScreen('screen2')">Dashboard</button>
+        <button class="nav-btn" onclick="showScreen('screen4')">Historique</button>
+    </div>
+</div>
+
+<!-- ÉCRAN 3: TRANSFERT 0% -->
+<div class="screen" id="screen3">
+    <div class="header"><h2>Transfert Intra-Afrique</h2></div>
+    <div class="card">
+        <p><span class="flag">🇸🇳</span>Sénégal → <span class="flag">🇨🇮</span>Côte d'Ivoire</p>
+        <h1 style="margin:20px 0">150 000 FCFA</h1>
+        <p>Le bénéficiaire reçoit <b>150 000 FCFA</b></p>
+        <p class="success">Frais BAOBPAY 0 FCFA</p>
+    </div>
+    <button class="btn btn-gold" onclick="showScreen('screen2')">Confirmer le transfert</button>
+    <button class="btn btn-dark" onclick="showScreen('screen2')">Retour</button>
+</div>
+
+<!-- ÉCRAN 4: HISTORIQUE -->
+<div class="screen" id="screen4">
+    <div class="header"><h2>Historique</h2></div>
+    <div class="transfer-item"><div>Achat d'or</div><div class="success">+5,2g</div></div>
+    <div class="transfer-item"><div>Transfert reçu<br><small>Koffi Mensah Abidjan</small></div><div class="success">+75 000 FCFA</div></div>
+    <div class="transfer-item"><div>Paiement marchand<br><small>Marché Tilène Dakar</small></div><div>-12 500 FCFA</div></div>
+    <div class="transfer-item"><div>Conversion Or → FCFA</div><div>250 000 FCFA</div></div>
+    <button class="btn btn-dark" onclick="showScreen('screen2')">Retour</button>
+</div>
+
+<!-- ÉCRAN 5: POSITIONNEMENT -->
+<div class="screen" id="screen5">
+    <div class="header"><div class="logo">🌳 BAOBPAY BCSA</div></div>
+    <h1>CONÇU DEPUIS L'AFRIQUE</h1>
+    <div class="card">
+        <h2>Une monnaie de confiance, à la mesure du continent</h2>
+        <p>BAOBPAY BCSA est l'infrastructure de paiement souveraine des États Africains. Adossée à l'Or, pour une souveraineté monétaire réelle.</p>
+    </div>
+    <button class="btn btn-gold" onclick="showScreen('screen6')">Découvrir</button>
+</div>
+
+<!-- ÉCRAN 6: AFRIQUE -->
+<div class="screen" id="screen6">
+    <div class="header"><h2>Présence Africaine</h2></div>
+    <div class="card">
+        <p><span class="flag">🇸🇳</span> Sénégal</p>
+        <p><span class="flag">🇨🇮</span> Côte d'Ivoire</p>
+        <p><span class="flag">🇬🇭</span> Ghana</p>
+        <p><span class="flag">🇧🇯</span> Bénin</p>
+        <p><span class="flag">🇹🇬</span> Togo</p>
+    </div>
+    <button class="btn btn-gold" onclick="showScreen('screen7')">Bureau de Change</button>
+</div>
+
+<!-- ÉCRAN 7: BUREAU DE CHANGE OR -->
+<div class="screen" id="screen7">
+    <div class="header"><h2>Bureau de Change Or</h2></div>
+    <div class="card card-gold">
+        <p>TAUX DU JOUR</p>
+        <div class="gold-amount">65 000 FCFA</div>
+        <p>/ gramme d'or</p>
+    </div>
+    <p style="text-align:center;margin:20px 0">Chaque BAOBPAY = 1 gramme d'or physique en réserve</p>
+    <button class="btn btn-dark" onclick="showScreen('screen1')">Retour Accueil</button>
+</div>
+
+<script>
+function showScreen(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0,0);
+}
+</script>
+
+</body>
+</html>
