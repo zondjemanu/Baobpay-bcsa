@@ -27,9 +27,9 @@ res.send(`<!DOCTYPE html><html><head><title>Transfert</title><meta name="viewpor
 });
 
 // ADMIN
-app.get('/admin', async (req, res) => {
+ app.get('/admin', async (req, res) => {
 const data = {users, transactions};
-res.send(`<!DOCTYPE html><html><head><title>Admin</title><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{background:#000;color:#FFD700;text-align:center;padding:20px}a{color:#FFD700}pre{background:#111;color:#FFF;text-align:left;padding:10px;border-radius:10px;overflow-x:auto}</style></head><body><h1>👑 Panel Admin CEO</h1><h3>WARI CHAIN DATA</h3><pre>${JSON.stringify(data, null, 2)}</pre><br><a href="/">← Retour</a></body></html>`);
+res.send(`<!DOCTYPE html><html><head><title>Admin CEO</title><meta name="viewport" content="width=device-width, initial-scale=1"><style>body{background:#000;color:#FFD700;font-family:Arial;padding:20px}h1{text-align:center}table{width:100%;border-collapse:collapse;margin:20px 0}th,td{border:1px solid #FFD700;padding:10px;text-align:left}th{background:#FFD700;color:#000}a{color:#FFD700;display:block;text-align:center;margin-top:20px}</style></head><body><h1>👑 PANEL ADMIN CEO</h1><h2>💼 Utilisateurs</h2><table><tr><th>Nom</th><th>Numéro</th><th>Solde</th></tr>${users.map(u=>`<tr><td>${u.nom}</td><td>${u.numero}</td><td>${u.solde} FCFA</td></tr>`).join('')}</table><h2>📊 WARI CHAIN - Transactions</h2><table><tr><th>ID</th><th>Numéro</th><th>Montant</th><th>Hash</th><th>Statut</th></tr>${transactions.length > 0 ? transactions.map(t=>`<tr><td>${t.id}</td><td>${t.numero}</td><td>${t.montant}</td><td>${t.hash}</td><td>${t.statut}</td></tr>`).join('') : '<tr><td colspan="5">Aucune transaction</td></tr>'}</table><a href="/">← Retour Accueil</a></body></html>`);
 });
 
 // API TRANSFERT
